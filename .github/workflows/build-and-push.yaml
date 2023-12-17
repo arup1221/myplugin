@@ -31,11 +31,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: |
-            arup1221/myplugin:0.1
-            arup1221/myplugin:0.1-${{ github.run_number }}
-            arup1221/myplugin:0.2
-            arup1221/myplugin:0.2-${{ github.run_number }}
+          tags: arup1221/myplugin:${{ steps.get_date.outputs.TIME }}
           platforms: linux/amd64,linux/arm64
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
