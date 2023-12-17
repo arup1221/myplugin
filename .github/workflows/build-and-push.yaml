@@ -33,9 +33,9 @@ jobs:
           push: true
           tags: |
             arup1221/myplugin:0.1
-            arup1221/myplugin:0.1-$(date +'%Y-%m-%d-%H%M%S')
+            arup1221/myplugin:0.1-${{ github.run_number }}
             arup1221/myplugin:0.2
-            arup1221/myplugin:0.2-$(date +'%Y-%m-%d-%H%M%S')
+            arup1221/myplugin:0.2-${{ github.run_number }}
           platforms: linux/amd64,linux/arm64
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
