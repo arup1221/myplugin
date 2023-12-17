@@ -7,32 +7,45 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
-    env:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: master
+        token: ${{ secrets.GH_PAT }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-      - name: Build and Push Docker Image
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: arup1221/myplugin:${{ steps.get_date.outputs.TIME }}
-          platforms: linux/amd64,linux/arm64
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Get Date
+      id: get_date
+      run: |
+        sudo ln -sf /usr/share/zoneinfo/Europe/London /etc/localtime
+        CURRENT_TIME=$(date +'%Y-%m-%d-%H%M%S')
+        
+        echo "TIME=$CURRENT_TIME" >> $GITHUB_ENV
+        echo "TIME=$CURRENT_TIME" >> $GITHUB_OUTPUT
+
+    - name: Build and push to Docker Hub
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: arup1221/myplugin:${{ steps.get_date.outputs.TIME }}
+
+        build-args: |
+          PACKAGE_VERSION=${{ env.PACKAGE_VERSION }}
+          BRANCH_NAME=${{ env.BRANCH_NAME }}
+        provenance: false
